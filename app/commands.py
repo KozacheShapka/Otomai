@@ -132,8 +132,8 @@ mp_commands = CommandSet("mp", "Multiplayer commands.")
 regular_commands = []
 command_sets = [
     mp_commands,
-    pool_commands,
-    clan_commands,
+    # pool_commands,
+    # clan_commands,
 ]
 
 
