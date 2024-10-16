@@ -742,7 +742,7 @@ async def osuSubmitModularSelector(
                         ann.insert(1, f"+{score.mods!r}")
 
                     scoring_metric = (
-                        "pp" if score.mode >= GameMode.RELAX_OSU else "score"
+                        "score" if score.mode >= GameMode.RELAX_OSU else "score"
                     )
 
                     # If there was previously a score on the map, add old #1.
@@ -1285,7 +1285,7 @@ async def getScores(
             app.state.sessions.players.enqueue(app.packets.user_stats(player))
 
     scoring_metric: Literal["pp", "score"] = (
-        "pp" if mode >= GameMode.RELAX_OSU else "score"
+        "score" if mode >= GameMode.RELAX_OSU else "score"
     )
 
     bmap = await Beatmap.from_md5(map_md5, set_id=map_set_id)
