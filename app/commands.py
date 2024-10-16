@@ -126,8 +126,8 @@ class CommandSet:
 
 
 mp_commands = CommandSet("mp", "Multiplayer commands.")
-pool_commands = CommandSet("pool", "Mappool commands.")
-clan_commands = CommandSet("clan", "Clan commands.")
+# pool_commands = CommandSet("pool", "Mappool commands.")
+# clan_commands = CommandSet("clan", "Clan commands.")
 
 regular_commands = []
 command_sets = [
@@ -2065,405 +2065,405 @@ async def mp_pick(ctx: Context, match: Match) -> str | None:
 """
 
 
-@pool_commands.add(Privileges.TOURNEY_MANAGER, aliases=["h"], hidden=True)
-async def pool_help(ctx: Context) -> str | None:
-    """Show all documented mappool commands the player can access."""
-    prefix = app.settings.COMMAND_PREFIX
-    cmds = []
+# @pool_commands.add(Privileges.TOURNEY_MANAGER, aliases=["h"], hidden=True)
+# async def pool_help(ctx: Context) -> str | None:
+#     """Show all documented mappool commands the player can access."""
+#     prefix = app.settings.COMMAND_PREFIX
+#     cmds = []
 
-    for cmd in pool_commands.commands:
-        if not cmd.doc or ctx.player.priv & cmd.priv != cmd.priv:
-            # no doc, or insufficient permissions.
-            continue
+#     for cmd in pool_commands.commands:
+#         if not cmd.doc or ctx.player.priv & cmd.priv != cmd.priv:
+#             # no doc, or insufficient permissions.
+#             continue
 
-        cmds.append(f"{prefix}pool {cmd.triggers[0]}: {cmd.doc}")
+#         cmds.append(f"{prefix}pool {cmd.triggers[0]}: {cmd.doc}")
 
-    return "\n".join(cmds)
+#     return "\n".join(cmds)
 
 
-@pool_commands.add(Privileges.TOURNEY_MANAGER, aliases=["c"], hidden=True)
-async def pool_create(ctx: Context) -> str | None:
-    """Add a new mappool to the database."""
-    if len(ctx.args) != 1:
-        return "Invalid syntax: !pool create <name>"
+# @pool_commands.add(Privileges.TOURNEY_MANAGER, aliases=["c"], hidden=True)
+# async def pool_create(ctx: Context) -> str | None:
+#     """Add a new mappool to the database."""
+#     if len(ctx.args) != 1:
+#         return "Invalid syntax: !pool create <name>"
 
-    name = ctx.args[0]
+#     name = ctx.args[0]
 
-    existing_pool = await tourney_pools_repo.fetch_by_name(name)
-    if existing_pool is not None:
-        return "Pool already exists by that name!"
+#     existing_pool = await tourney_pools_repo.fetch_by_name(name)
+#     if existing_pool is not None:
+#         return "Pool already exists by that name!"
 
-    tourney_pool = await tourney_pools_repo.create(
-        name=name,
-        created_by=ctx.player.id,
-    )
+#     tourney_pool = await tourney_pools_repo.create(
+#         name=name,
+#         created_by=ctx.player.id,
+#     )
 
-    return f"{name} created."
+#     return f"{name} created."
 
 
-@pool_commands.add(Privileges.TOURNEY_MANAGER, aliases=["del", "d"], hidden=True)
-async def pool_delete(ctx: Context) -> str | None:
-    """Remove a mappool from the database."""
-    if len(ctx.args) != 1:
-        return "Invalid syntax: !pool delete <name>"
+# @pool_commands.add(Privileges.TOURNEY_MANAGER, aliases=["del", "d"], hidden=True)
+# async def pool_delete(ctx: Context) -> str | None:
+#     """Remove a mappool from the database."""
+#     if len(ctx.args) != 1:
+#         return "Invalid syntax: !pool delete <name>"
 
-    name = ctx.args[0]
+#     name = ctx.args[0]
 
-    existing_pool = await tourney_pools_repo.fetch_by_name(name)
-    if existing_pool is None:
-        return "Could not find a pool by that name!"
+#     existing_pool = await tourney_pools_repo.fetch_by_name(name)
+#     if existing_pool is None:
+#         return "Could not find a pool by that name!"
 
-    await tourney_pools_repo.delete_by_id(existing_pool["id"])
-    await tourney_pool_maps_repo.delete_all_in_pool(pool_id=existing_pool["id"])
+#     await tourney_pools_repo.delete_by_id(existing_pool["id"])
+#     await tourney_pool_maps_repo.delete_all_in_pool(pool_id=existing_pool["id"])
 
-    return f"{name} deleted."
+#     return f"{name} deleted."
 
 
-@pool_commands.add(Privileges.TOURNEY_MANAGER, aliases=["a"], hidden=True)
-async def pool_add(ctx: Context) -> str | None:
-    """Add a new map to a mappool in the database."""
-    if len(ctx.args) != 2:
-        return "Invalid syntax: !pool add <name> <pick>"
+# @pool_commands.add(Privileges.TOURNEY_MANAGER, aliases=["a"], hidden=True)
+# async def pool_add(ctx: Context) -> str | None:
+#     """Add a new map to a mappool in the database."""
+#     if len(ctx.args) != 2:
+#         return "Invalid syntax: !pool add <name> <pick>"
 
-    if ctx.player.last_np is None or time.time() >= ctx.player.last_np["timeout"]:
-        return "Please /np a map first!"
+#     if ctx.player.last_np is None or time.time() >= ctx.player.last_np["timeout"]:
+#         return "Please /np a map first!"
 
-    name, mods_slot = ctx.args
-    mods_slot = mods_slot.upper()  # ocd
-    bmap = ctx.player.last_np["bmap"]
+#     name, mods_slot = ctx.args
+#     mods_slot = mods_slot.upper()  # ocd
+#     bmap = ctx.player.last_np["bmap"]
 
-    # separate mods & slot
-    r_match = regexes.MAPPOOL_PICK.fullmatch(mods_slot)
-    if not r_match:
-        return "Invalid pick syntax; correct example: HD2"
+#     # separate mods & slot
+#     r_match = regexes.MAPPOOL_PICK.fullmatch(mods_slot)
+#     if not r_match:
+#         return "Invalid pick syntax; correct example: HD2"
 
-    if len(r_match[1]) % 2 != 0:
-        return "Invalid mods."
+#     if len(r_match[1]) % 2 != 0:
+#         return "Invalid mods."
 
-    # not calling mods.filter_invalid_combos here intentionally.
-    mods = Mods.from_modstr(r_match[1])
-    slot = int(r_match[2])
+#     # not calling mods.filter_invalid_combos here intentionally.
+#     mods = Mods.from_modstr(r_match[1])
+#     slot = int(r_match[2])
 
-    tourney_pool = await tourney_pools_repo.fetch_by_name(name)
-    if tourney_pool is None:
-        return "Could not find a pool by that name!"
+#     tourney_pool = await tourney_pools_repo.fetch_by_name(name)
+#     if tourney_pool is None:
+#         return "Could not find a pool by that name!"
 
-    tourney_pool_maps = await tourney_pool_maps_repo.fetch_many(
-        pool_id=tourney_pool["id"],
-    )
-    for pool_map in tourney_pool_maps:
-        if mods == pool_map["mods"] and slot == pool_map["slot"]:
-            pool_beatmap = await Beatmap.from_bid(pool_map["map_id"])
-            assert pool_beatmap is not None
-            return f"{mods_slot} is already {pool_beatmap.embed}!"
+#     tourney_pool_maps = await tourney_pool_maps_repo.fetch_many(
+#         pool_id=tourney_pool["id"],
+#     )
+#     for pool_map in tourney_pool_maps:
+#         if mods == pool_map["mods"] and slot == pool_map["slot"]:
+#             pool_beatmap = await Beatmap.from_bid(pool_map["map_id"])
+#             assert pool_beatmap is not None
+#             return f"{mods_slot} is already {pool_beatmap.embed}!"
 
-        if pool_map["map_id"] == bmap.id:
-            return f"{bmap.embed} is already in the pool!"
-
-    await tourney_pool_maps_repo.create(
-        map_id=bmap.id,
-        pool_id=tourney_pool["id"],
-        mods=mods,
-        slot=slot,
-    )
-
-    return f"{bmap.embed} added to {name} as {mods_slot}."
+#         if pool_map["map_id"] == bmap.id:
+#             return f"{bmap.embed} is already in the pool!"
+
+#     await tourney_pool_maps_repo.create(
+#         map_id=bmap.id,
+#         pool_id=tourney_pool["id"],
+#         mods=mods,
+#         slot=slot,
+#     )
+
+#     return f"{bmap.embed} added to {name} as {mods_slot}."
 
 
-@pool_commands.add(Privileges.TOURNEY_MANAGER, aliases=["rm", "r"], hidden=True)
-async def pool_remove(ctx: Context) -> str | None:
-    """Remove a map from a mappool in the database."""
-    if len(ctx.args) != 2:
-        return "Invalid syntax: !pool remove <name> <pick>"
+# @pool_commands.add(Privileges.TOURNEY_MANAGER, aliases=["rm", "r"], hidden=True)
+# async def pool_remove(ctx: Context) -> str | None:
+#     """Remove a map from a mappool in the database."""
+#     if len(ctx.args) != 2:
+#         return "Invalid syntax: !pool remove <name> <pick>"
 
-    name, mods_slot = ctx.args
-    mods_slot = mods_slot.upper()  # ocd
-
-    # separate mods & slot
-    r_match = regexes.MAPPOOL_PICK.fullmatch(mods_slot)
-    if not r_match:
-        return "Invalid pick syntax; correct example: HD2"
+#     name, mods_slot = ctx.args
+#     mods_slot = mods_slot.upper()  # ocd
+
+#     # separate mods & slot
+#     r_match = regexes.MAPPOOL_PICK.fullmatch(mods_slot)
+#     if not r_match:
+#         return "Invalid pick syntax; correct example: HD2"
 
-    # not calling mods.filter_invalid_combos here intentionally.
-    mods = Mods.from_modstr(r_match[1])
-    slot = int(r_match[2])
+#     # not calling mods.filter_invalid_combos here intentionally.
+#     mods = Mods.from_modstr(r_match[1])
+#     slot = int(r_match[2])
 
-    tourney_pool = await tourney_pools_repo.fetch_by_name(name)
-    if tourney_pool is None:
-        return "Could not find a pool by that name!"
+#     tourney_pool = await tourney_pools_repo.fetch_by_name(name)
+#     if tourney_pool is None:
+#         return "Could not find a pool by that name!"
 
-    map_pick = await tourney_pool_maps_repo.fetch_by_pool_and_pick(
-        pool_id=tourney_pool["id"],
-        mods=mods,
-        slot=slot,
-    )
-    if map_pick is None:
-        return f"Found no {mods_slot} pick in the pool."
+#     map_pick = await tourney_pool_maps_repo.fetch_by_pool_and_pick(
+#         pool_id=tourney_pool["id"],
+#         mods=mods,
+#         slot=slot,
+#     )
+#     if map_pick is None:
+#         return f"Found no {mods_slot} pick in the pool."
 
-    await tourney_pool_maps_repo.delete_map_from_pool(
-        map_pick["pool_id"],
-        map_pick["map_id"],
-    )
+#     await tourney_pool_maps_repo.delete_map_from_pool(
+#         map_pick["pool_id"],
+#         map_pick["map_id"],
+#     )
 
-    return f"{mods_slot} removed from {name}."
+#     return f"{mods_slot} removed from {name}."
 
 
-@pool_commands.add(Privileges.TOURNEY_MANAGER, aliases=["l"], hidden=True)
-async def pool_list(ctx: Context) -> str | None:
-    """List all existing mappools information."""
-    tourney_pools = await tourney_pools_repo.fetch_many(page=None, page_size=None)
-    if not tourney_pools:
-        return "There are currently no pools!"
+# @pool_commands.add(Privileges.TOURNEY_MANAGER, aliases=["l"], hidden=True)
+# async def pool_list(ctx: Context) -> str | None:
+#     """List all existing mappools information."""
+#     tourney_pools = await tourney_pools_repo.fetch_many(page=None, page_size=None)
+#     if not tourney_pools:
+#         return "There are currently no pools!"
 
-    l = [f"Mappools ({len(tourney_pools)})"]
+#     l = [f"Mappools ({len(tourney_pools)})"]
 
-    for pool in tourney_pools:
-        created_by = await users_repo.fetch_one(id=pool["created_by"])
-        if created_by is None:
-            log(f"Could not find pool creator (Id {pool['created_by']}).", Ansi.LRED)
-            continue
+#     for pool in tourney_pools:
+#         created_by = await users_repo.fetch_one(id=pool["created_by"])
+#         if created_by is None:
+#             log(f"Could not find pool creator (Id {pool['created_by']}).", Ansi.LRED)
+#             continue
 
-        l.append(
-            f"[{pool['created_at']:%Y-%m-%d}] "
-            f"{pool['name']}, by {created_by['name']}.",
-        )
-
-    return "\n".join(l)
+#         l.append(
+#             f"[{pool['created_at']:%Y-%m-%d}] "
+#             f"{pool['name']}, by {created_by['name']}.",
+#         )
+
+#     return "\n".join(l)
 
-
-@pool_commands.add(Privileges.TOURNEY_MANAGER, aliases=["i"], hidden=True)
-async def pool_info(ctx: Context) -> str | None:
-    """Get all information for a specific mappool."""
-    if len(ctx.args) != 1:
-        return "Invalid syntax: !pool info <name>"
-
-    name = ctx.args[0]
+
+# @pool_commands.add(Privileges.TOURNEY_MANAGER, aliases=["i"], hidden=True)
+# async def pool_info(ctx: Context) -> str | None:
+#     """Get all information for a specific mappool."""
+#     if len(ctx.args) != 1:
+#         return "Invalid syntax: !pool info <name>"
+
+#     name = ctx.args[0]
 
-    tourney_pool = await tourney_pools_repo.fetch_by_name(name)
-    if tourney_pool is None:
-        return "Could not find a pool by that name!"
-
-    _time = tourney_pool["created_at"].strftime("%H:%M:%S%p")
-    _date = tourney_pool["created_at"].strftime("%Y-%m-%d")
-    datetime_fmt = f"Created at {_time} on {_date}"
-    l = [
-        f"{tourney_pool['id']}. {tourney_pool['name']}, by {tourney_pool['created_by']} | {datetime_fmt}.",
-    ]
-
-    for tourney_map in sorted(
-        await tourney_pool_maps_repo.fetch_many(pool_id=tourney_pool["id"]),
-        key=lambda x: (repr(Mods(x["mods"])), x["slot"]),
-    ):
-        bmap = await Beatmap.from_bid(tourney_map["map_id"])
-        if bmap is None:
-            log(f"Could not find beatmap {tourney_map['map_id']}.", Ansi.LRED)
-            continue
-        l.append(f"{Mods(tourney_map['mods'])!r}{tourney_map['slot']}: {bmap.embed}")
-
-    return "\n".join(l)
-
-
-""" Clan managment commands
-# The commands below are for managing bancho.py
-# clans, for users, clan staff, and server staff.
-"""
-
-
-@clan_commands.add(Privileges.UNRESTRICTED, aliases=["h"])
-async def clan_help(ctx: Context) -> str | None:
-    """Show all documented clan commands the player can access."""
-    prefix = app.settings.COMMAND_PREFIX
-    cmds = []
-
-    for cmd in clan_commands.commands:
-        if not cmd.doc or ctx.player.priv & cmd.priv != cmd.priv:
-            # no doc, or insufficient permissions.
-            continue
-
-        cmds.append(f"{prefix}clan {cmd.triggers[0]}: {cmd.doc}")
-
-    return "\n".join(cmds)
-
-
-@clan_commands.add(Privileges.UNRESTRICTED, aliases=["c"])
-async def clan_create(ctx: Context) -> str | None:
-    """Create a clan with a given tag & name."""
-    if len(ctx.args) < 2:
-        return "Invalid syntax: !clan create <tag> <name>"
-
-    tag = ctx.args[0].upper()
-    if not 1 <= len(tag) <= 6:
-        return "Clan tag may be 1-6 characters long."
-
-    name = " ".join(ctx.args[1:])
-    if not 2 <= len(name) <= 16:
-        return "Clan name may be 2-16 characters long."
-
-    if ctx.player.clan_id:
-        clan = await clans_repo.fetch_one(id=ctx.player.clan_id)
-        if clan:
-            clan_display_name = f"[{clan['tag']}] {clan['name']}"
-            return f"You're already a member of {clan_display_name}!"
-
-    if await clans_repo.fetch_one(name=name):
-        return "That name has already been claimed by another clan."
-
-    if await clans_repo.fetch_one(tag=tag):
-        return "That tag has already been claimed by another clan."
-
-    # add clan to sql
-    new_clan = await clans_repo.create(
-        name=name,
-        tag=tag,
-        owner=ctx.player.id,
-    )
-
-    # set owner's clan & clan priv (cache & sql)
-    ctx.player.clan_id = new_clan["id"]
-    ctx.player.clan_priv = ClanPrivileges.Owner
-
-    await users_repo.partial_update(
-        ctx.player.id,
-        clan_id=new_clan["id"],
-        clan_priv=ClanPrivileges.Owner,
-    )
-
-    # announce clan creation
-    announce_chan = app.state.sessions.channels.get_by_name("#announce")
-    clan_display_name = f"[{new_clan['tag']}] {new_clan['name']}"
-    if announce_chan:
-        msg = f"\x01ACTION founded {clan_display_name}."
-        announce_chan.send(msg, sender=ctx.player, to_self=True)
-
-    return f"{clan_display_name} founded."
-
-
-@clan_commands.add(Privileges.UNRESTRICTED, aliases=["delete", "d"])
-async def clan_disband(ctx: Context) -> str | None:
-    """Disband a clan (admins may disband others clans)."""
-    if ctx.args:
-        # disband a specified clan by tag
-        if ctx.player not in app.state.sessions.players.staff:
-            return "Only staff members may disband the clans of others."
+#     tourney_pool = await tourney_pools_repo.fetch_by_name(name)
+#     if tourney_pool is None:
+#         return "Could not find a pool by that name!"
+
+#     _time = tourney_pool["created_at"].strftime("%H:%M:%S%p")
+#     _date = tourney_pool["created_at"].strftime("%Y-%m-%d")
+#     datetime_fmt = f"Created at {_time} on {_date}"
+#     l = [
+#         f"{tourney_pool['id']}. {tourney_pool['name']}, by {tourney_pool['created_by']} | {datetime_fmt}.",
+#     ]
+
+#     for tourney_map in sorted(
+#         await tourney_pool_maps_repo.fetch_many(pool_id=tourney_pool["id"]),
+#         key=lambda x: (repr(Mods(x["mods"])), x["slot"]),
+#     ):
+#         bmap = await Beatmap.from_bid(tourney_map["map_id"])
+#         if bmap is None:
+#             log(f"Could not find beatmap {tourney_map['map_id']}.", Ansi.LRED)
+#             continue
+#         l.append(f"{Mods(tourney_map['mods'])!r}{tourney_map['slot']}: {bmap.embed}")
+
+#     return "\n".join(l)
+
+
+# """ Clan managment commands
+# # The commands below are for managing bancho.py
+# # clans, for users, clan staff, and server staff.
+# """
+
+
+# @clan_commands.add(Privileges.UNRESTRICTED, aliases=["h"])
+# async def clan_help(ctx: Context) -> str | None:
+#     """Show all documented clan commands the player can access."""
+#     prefix = app.settings.COMMAND_PREFIX
+#     cmds = []
+
+#     for cmd in clan_commands.commands:
+#         if not cmd.doc or ctx.player.priv & cmd.priv != cmd.priv:
+#             # no doc, or insufficient permissions.
+#             continue
+
+#         cmds.append(f"{prefix}clan {cmd.triggers[0]}: {cmd.doc}")
+
+#     return "\n".join(cmds)
+
+
+# @clan_commands.add(Privileges.UNRESTRICTED, aliases=["c"])
+# async def clan_create(ctx: Context) -> str | None:
+#     """Create a clan with a given tag & name."""
+#     if len(ctx.args) < 2:
+#         return "Invalid syntax: !clan create <tag> <name>"
+
+#     tag = ctx.args[0].upper()
+#     if not 1 <= len(tag) <= 6:
+#         return "Clan tag may be 1-6 characters long."
+
+#     name = " ".join(ctx.args[1:])
+#     if not 2 <= len(name) <= 16:
+#         return "Clan name may be 2-16 characters long."
+
+#     if ctx.player.clan_id:
+#         clan = await clans_repo.fetch_one(id=ctx.player.clan_id)
+#         if clan:
+#             clan_display_name = f"[{clan['tag']}] {clan['name']}"
+#             return f"You're already a member of {clan_display_name}!"
+
+#     if await clans_repo.fetch_one(name=name):
+#         return "That name has already been claimed by another clan."
+
+#     if await clans_repo.fetch_one(tag=tag):
+#         return "That tag has already been claimed by another clan."
+
+#     # add clan to sql
+#     new_clan = await clans_repo.create(
+#         name=name,
+#         tag=tag,
+#         owner=ctx.player.id,
+#     )
+
+#     # set owner's clan & clan priv (cache & sql)
+#     ctx.player.clan_id = new_clan["id"]
+#     ctx.player.clan_priv = ClanPrivileges.Owner
+
+#     await users_repo.partial_update(
+#         ctx.player.id,
+#         clan_id=new_clan["id"],
+#         clan_priv=ClanPrivileges.Owner,
+#     )
+
+#     # announce clan creation
+#     announce_chan = app.state.sessions.channels.get_by_name("#announce")
+#     clan_display_name = f"[{new_clan['tag']}] {new_clan['name']}"
+#     if announce_chan:
+#         msg = f"\x01ACTION founded {clan_display_name}."
+#         announce_chan.send(msg, sender=ctx.player, to_self=True)
+
+#     return f"{clan_display_name} founded."
+
+
+# @clan_commands.add(Privileges.UNRESTRICTED, aliases=["delete", "d"])
+# async def clan_disband(ctx: Context) -> str | None:
+#     """Disband a clan (admins may disband others clans)."""
+#     if ctx.args:
+#         # disband a specified clan by tag
+#         if ctx.player not in app.state.sessions.players.staff:
+#             return "Only staff members may disband the clans of others."
 
-        clan = await clans_repo.fetch_one(tag=" ".join(ctx.args).upper())
-        if not clan:
-            return "Could not find a clan by that tag."
-    else:
-        if ctx.player.clan_id is None:
-            return "You're not a member of a clan!"
-
-        # disband the player's clan
-        clan = await clans_repo.fetch_one(id=ctx.player.clan_id)
-        if not clan:
-            return "You're not a member of a clan!"
-
-    await clans_repo.delete_one(clan["id"])
-
-    # remove all members from the clan
-    clan_member_ids = [
-        clan_member["id"]
-        for clan_member in await users_repo.fetch_many(clan_id=clan["id"])
-    ]
-    for member_id in clan_member_ids:
-        await users_repo.partial_update(member_id, clan_id=0, clan_priv=0)
-
-        member = app.state.sessions.players.get(id=member_id)
-        if member:
-            member.clan_id = None
-            member.clan_priv = None
-
-    # announce clan disbanding
-    announce_chan = app.state.sessions.channels.get_by_name("#announce")
-    clan_display_name = f"[{clan['tag']}] {clan['name']}"
-    if announce_chan:
-        msg = f"\x01ACTION disbanded {clan_display_name}."
-        announce_chan.send(msg, sender=ctx.player, to_self=True)
-
-    return f"{clan_display_name} disbanded."
-
-
-@clan_commands.add(Privileges.UNRESTRICTED, aliases=["i"])
-async def clan_info(ctx: Context) -> str | None:
-    """Lookup information of a clan by tag."""
-    if not ctx.args:
-        return "Invalid syntax: !clan info <tag>"
-
-    clan = await clans_repo.fetch_one(tag=" ".join(ctx.args).upper())
-    if not clan:
-        return "Could not find a clan by that tag."
-
-    clan_display_name = f"[{clan['tag']}] {clan['name']}"
-    msg = [f"{clan_display_name} | Founded {clan['created_at']:%b %d, %Y}."]
-
-    # get members privs from sql
-    clan_members = await users_repo.fetch_many(clan_id=clan["id"])
-    for member in sorted(clan_members, key=lambda m: m["clan_priv"], reverse=True):
-        priv_str = ("Member", "Officer", "Owner")[member["clan_priv"] - 1]
-        msg.append(f"[{priv_str}] {member['name']}")
-
-    return "\n".join(msg)
-
-
-@clan_commands.add(Privileges.UNRESTRICTED)
-async def clan_leave(ctx: Context) -> str | None:
-    """Leaves the clan you're in."""
-    if not ctx.player.clan_id:
-        return "You're not in a clan."
-    elif ctx.player.clan_priv == ClanPrivileges.Owner:
-        return "You must transfer your clan's ownership before leaving it. Alternatively, you can use !clan disband."
-
-    clan = await clans_repo.fetch_one(id=ctx.player.clan_id)
-    if not clan:
-        return "You're not in a clan."
-
-    clan_members = await users_repo.fetch_many(clan_id=clan["id"])
-
-    await users_repo.partial_update(ctx.player.id, clan_id=0, clan_priv=0)
-    ctx.player.clan_id = None
-    ctx.player.clan_priv = None
-
-    clan_display_name = f"[{clan['tag']}] {clan['name']}"
-
-    if not clan_members:
-        # no members left, disband clan
-        await clans_repo.delete_one(clan["id"])
-
-        # announce clan disbanding
-        announce_chan = app.state.sessions.channels.get_by_name("#announce")
-        if announce_chan:
-            msg = f"\x01ACTION disbanded {clan_display_name}."
-            announce_chan.send(msg, sender=ctx.player, to_self=True)
-
-    return f"You have successfully left {clan_display_name}."
-
-
-# TODO: !clan inv, !clan join, !clan leave
-
-
-@clan_commands.add(Privileges.UNRESTRICTED, aliases=["l"])
-async def clan_list(ctx: Context) -> str | None:
-    """List all existing clans' information."""
-    if ctx.args:
-        if len(ctx.args) != 1 or not ctx.args[0].isdecimal():
-            return "Invalid syntax: !clan list (page)"
-        else:
-            offset = 25 * int(ctx.args[0])
-    else:
-        offset = 0
-
-    all_clans = await clans_repo.fetch_many(page=None, page_size=None)
-    num_clans = len(all_clans)
-    if offset >= num_clans:
-        return "No clans found."
-
-    msg = [f"bancho.py clans listing ({num_clans} total)."]
-
-    for idx, clan in enumerate(all_clans, offset):
-        clan_display_name = f"[{clan['tag']}] {clan['name']}"
-        msg.append(f"{idx + 1}. {clan_display_name}")
-
-    return "\n".join(msg)
+#         clan = await clans_repo.fetch_one(tag=" ".join(ctx.args).upper())
+#         if not clan:
+#             return "Could not find a clan by that tag."
+#     else:
+#         if ctx.player.clan_id is None:
+#             return "You're not a member of a clan!"
+
+#         # disband the player's clan
+#         clan = await clans_repo.fetch_one(id=ctx.player.clan_id)
+#         if not clan:
+#             return "You're not a member of a clan!"
+
+#     await clans_repo.delete_one(clan["id"])
+
+#     # remove all members from the clan
+#     clan_member_ids = [
+#         clan_member["id"]
+#         for clan_member in await users_repo.fetch_many(clan_id=clan["id"])
+#     ]
+#     for member_id in clan_member_ids:
+#         await users_repo.partial_update(member_id, clan_id=0, clan_priv=0)
+
+#         member = app.state.sessions.players.get(id=member_id)
+#         if member:
+#             member.clan_id = None
+#             member.clan_priv = None
+
+#     # announce clan disbanding
+#     announce_chan = app.state.sessions.channels.get_by_name("#announce")
+#     clan_display_name = f"[{clan['tag']}] {clan['name']}"
+#     if announce_chan:
+#         msg = f"\x01ACTION disbanded {clan_display_name}."
+#         announce_chan.send(msg, sender=ctx.player, to_self=True)
+
+#     return f"{clan_display_name} disbanded."
+
+
+# @clan_commands.add(Privileges.UNRESTRICTED, aliases=["i"])
+# async def clan_info(ctx: Context) -> str | None:
+#     """Lookup information of a clan by tag."""
+#     if not ctx.args:
+#         return "Invalid syntax: !clan info <tag>"
+
+#     clan = await clans_repo.fetch_one(tag=" ".join(ctx.args).upper())
+#     if not clan:
+#         return "Could not find a clan by that tag."
+
+#     clan_display_name = f"[{clan['tag']}] {clan['name']}"
+#     msg = [f"{clan_display_name} | Founded {clan['created_at']:%b %d, %Y}."]
+
+#     # get members privs from sql
+#     clan_members = await users_repo.fetch_many(clan_id=clan["id"])
+#     for member in sorted(clan_members, key=lambda m: m["clan_priv"], reverse=True):
+#         priv_str = ("Member", "Officer", "Owner")[member["clan_priv"] - 1]
+#         msg.append(f"[{priv_str}] {member['name']}")
+
+#     return "\n".join(msg)
+
+
+# @clan_commands.add(Privileges.UNRESTRICTED)
+# async def clan_leave(ctx: Context) -> str | None:
+#     """Leaves the clan you're in."""
+#     if not ctx.player.clan_id:
+#         return "You're not in a clan."
+#     elif ctx.player.clan_priv == ClanPrivileges.Owner:
+#         return "You must transfer your clan's ownership before leaving it. Alternatively, you can use !clan disband."
+
+#     clan = await clans_repo.fetch_one(id=ctx.player.clan_id)
+#     if not clan:
+#         return "You're not in a clan."
+
+#     clan_members = await users_repo.fetch_many(clan_id=clan["id"])
+
+#     await users_repo.partial_update(ctx.player.id, clan_id=0, clan_priv=0)
+#     ctx.player.clan_id = None
+#     ctx.player.clan_priv = None
+
+#     clan_display_name = f"[{clan['tag']}] {clan['name']}"
+
+#     if not clan_members:
+#         # no members left, disband clan
+#         await clans_repo.delete_one(clan["id"])
+
+#         # announce clan disbanding
+#         announce_chan = app.state.sessions.channels.get_by_name("#announce")
+#         if announce_chan:
+#             msg = f"\x01ACTION disbanded {clan_display_name}."
+#             announce_chan.send(msg, sender=ctx.player, to_self=True)
+
+#     return f"You have successfully left {clan_display_name}."
+
+
+# # TODO: !clan inv, !clan join, !clan leave
+
+
+# @clan_commands.add(Privileges.UNRESTRICTED, aliases=["l"])
+# async def clan_list(ctx: Context) -> str | None:
+#     """List all existing clans' information."""
+#     if ctx.args:
+#         if len(ctx.args) != 1 or not ctx.args[0].isdecimal():
+#             return "Invalid syntax: !clan list (page)"
+#         else:
+#             offset = 25 * int(ctx.args[0])
+#     else:
+#         offset = 0
+
+#     all_clans = await clans_repo.fetch_many(page=None, page_size=None)
+#     num_clans = len(all_clans)
+#     if offset >= num_clans:
+#         return "No clans found."
+
+#     msg = [f"bancho.py clans listing ({num_clans} total)."]
+
+#     for idx, clan in enumerate(all_clans, offset):
+#         clan_display_name = f"[{clan['tag']}] {clan['name']}"
+#         msg.append(f"{idx + 1}. {clan_display_name}")
+
+#     return "\n".join(msg)
 
 
 class CommandResponse(TypedDict):
