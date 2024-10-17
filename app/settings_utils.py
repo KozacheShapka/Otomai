@@ -20,7 +20,7 @@ import os
 def read_backgrounds(value: str) -> list[str]:
     SEASONAL_BGS = os.getenv("SEASONAL_BGS").split(",")
     result = []
-    base_url = "https://assets.kozacheshapka.pp.ua/backgrounds/"
+    base_url = f"https://assets.{os.getenv('DOMAIN')}/backgrounds/"
 
     for path in SEASONAL_BGS:
         path = path.strip()
