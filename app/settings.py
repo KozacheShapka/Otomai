@@ -7,7 +7,7 @@ from urllib.parse import quote
 from dotenv import load_dotenv
 
 from app.settings_utils import read_bool
-from app.settings_utils import read_list
+from app.settings_utils import read_list, read_backgrounds
 
 load_dotenv()
 
@@ -38,7 +38,7 @@ MIRROR_DOWNLOAD_ENDPOINT = os.environ["MIRROR_DOWNLOAD_ENDPOINT"]
 
 COMMAND_PREFIX = os.environ["COMMAND_PREFIX"]
 
-SEASONAL_BGS = read_list(os.environ["SEASONAL_BGS"])
+SEASONAL_BGS = os.getenv("SEASONAL_BGS")
 
 MENU_ICON_URL = os.environ["MENU_ICON_URL"]
 MENU_ONCLICK_URL = os.environ["MENU_ONCLICK_URL"]

@@ -59,6 +59,7 @@ from app.objects.player import Player
 from app.objects.score import Grade
 from app.objects.score import Score
 from app.objects.score import SubmissionStatus
+from app.settings_utils import read_backgrounds
 from app.repositories import clans as clans_repo
 from app.repositories import comments as comments_repo
 from app.repositories import favourites as favourites_repo
@@ -1528,8 +1529,9 @@ async def osuMarkAsRead(
 
 
 @router.get("/web/osu-getseasonal.php")
-async def osuSeasonal() -> Response:
-    return ORJSONResponse(app.settings.SEASONAL_BGS)
+async def osuSeasonal() -> ORJSONResponse:
+    seasonal_backgrounds = read_backgrounds(app.settings.SEASONAL_BGS)
+    return ORJSONResponse(seasonal_backgrounds)
 
 
 @router.get("/web/bancho_connect.php")

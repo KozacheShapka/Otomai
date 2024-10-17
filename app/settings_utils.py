@@ -14,6 +14,29 @@ def read_bool(value: str) -> bool:
 def read_list(value: str) -> list[str]:
     return [v.strip() for v in value.split(",")]
 
+import os
+
+
+def read_backgrounds(value: str) -> list[str]:
+    SEASONAL_BGS = os.getenv("SEASONAL_BGS").split(",")
+    result = []
+    base_url = "https://assets.kozacheshapka.pp.ua/backgrounds/"
+
+    for path in SEASONAL_BGS:
+        path = path.strip()
+        if os.path.isdir(path):
+            for root, dirs, files in os.walk(path):
+                image_files = [
+                    f for f in files 
+                    if f.lower().endswith(('.png', '.jpg', '.jpeg'))
+                ]
+                for image_file in image_files:
+                    relative_path = os.path.relpath(os.path.join(root, image_file), os.path.dirname(path))
+                    url_path = os.path.join(os.path.basename(os.path.dirname(path)), relative_path).replace(os.sep, '/')
+                    url = base_url + url_path
+                    result.append(url)
+                    
+    return result
 
 def support_deprecated_vars(
     new_name: str,
