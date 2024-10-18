@@ -32,6 +32,10 @@ import psutil
 import timeago
 from pytimeparse.timeparse import timeparse
 
+import aiohttp
+from PIL import Image
+from io import BytesIO
+
 import app.logging
 import app.packets
 import app.settings
@@ -2464,6 +2468,37 @@ async def mp_pick(ctx: Context, match: Match) -> str | None:
 #         msg.append(f"{idx + 1}. {clan_display_name}")
 
 #     return "\n".join(msg)
+
+@command(Privileges.UNRESTRICTED, aliases=['ava'])
+async def avatar(ctx: Context) -> str | None:
+    """Change avatar"""
+    userid = ctx.player.id
+    url = ctx.args[0] if ctx.args else None
+
+    if not url:
+        return "URL is required."
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            if response.status != 200:
+                return f"Failed to download avatar (status: {response.status})."
+
+            if 'image' not in response.headers.get('Content-Type', ''):
+                return "Invalid file type. Only images are allowed."
+
+            avatar_data = await response.read()
+
+            try:
+                img = Image.open(BytesIO(avatar_data))
+                img = img.convert("RGB")
+                avatar_path = Path(app.settings.AVATARS_DIR) / f"{userid}.jpg"
+
+                img.save(avatar_path, format="JPEG")
+
+                return f"Avatar updated. Restart osu to apply changes."
+            except Exception as e:
+                return f"Failed to process image: {str(e)}"
+
 
 
 class CommandResponse(TypedDict):
